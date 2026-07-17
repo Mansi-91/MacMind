@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
+
 import api from "../services/api";
 
 import Sidebar from "../components/Sidebar";
-import StatCard from "../components/StatCard";
+import HeroSection from "../components/HeroSection";
+import ScanPanel from "../components/ScanPanel";
 import SearchBar from "../components/SearchBar";
+import StatCard from "../components/StatCard";
 import FileTable from "../components/FileTable";
-
-import ScanButton from "../components/ScanButton";
+import InsightsCard from "../components/InsightsCard";
+import HealthScore from "../components/HealthScore";
+import { FolderOpen, HardDrive, FileText, Image } from "lucide-react";
 
 function Dashboard() {
   const [stats, setStats] = useState({
@@ -19,108 +23,127 @@ function Dashboard() {
   const [files, setFiles] = useState([]);
   const [search, setSearch] = useState("");
 
-  // Fetch dashboard statistics
-  const fetchStats = async () => {
+  useEffect(() => {
+    fetchDashboard();
+    fetchFiles();
+  }, []);
+
+  async function fetchDashboard() {
     try {
       const res = await api.get("/dashboard/stats");
       setStats(res.data);
     } catch (err) {
-      console.error("Error fetching stats:", err);
+      console.error("Dashboard Error:", err);
     }
-  };
+  }
 
-  // Fetch all files
-  const fetchFiles = async () => {
+  async function fetchFiles() {
     try {
       const res = await api.get("/files");
       setFiles(res.data);
     } catch (err) {
-      console.error("Error fetching files:", err);
+      console.error("Files Error:", err);
     }
-  };
+  }
 
-  // Search files
-  const searchFiles = async (keyword) => {
+  async function searchFiles(keyword) {
+    setSearch(keyword);
+
     try {
+      if (keyword.trim() === "") {
+        fetchFiles();
+        return;
+      }
+
       const res = await api.get(`/files/search?q=${keyword}`);
+
       setFiles(res.data);
     } catch (err) {
-      console.error("Error searching files:", err);
+      console.error(err);
     }
-  };
-
-  // Initial load
-  useEffect(() => {
-    fetchStats();
-    fetchFiles();
-  }, []);
-
-  // Search whenever input changes
-  useEffect(() => {
-    if (search.trim() === "") {
-      fetchFiles();
-    } else {
-      searchFiles(search);
-    }
-  }, [search]);
+  }
 
   return (
-    <div className="flex min-h-screen bg-zinc-950 text-white">
+    <div className="flex bg-slate-100 min-h-screen">
       <Sidebar />
 
-      <main className="flex-1 p-10">
-        <h1 className="text-4xl font-bold mb-2">
-          Dashboard
-        </h1>
-        <div className="mb-8">
-            <ScanButton 
-                onComplete={() => {
-                    fetchStats();
-                    fetchFiles();
-                }}
-            />
-        </div>
+      <div className="flex-1 p-8 overflow-auto">
+        {/* Hero Section */}
 
-        <p className="text-zinc-400 mb-8">
-          Welcome to MacMind 🚀
-        </p>
+        <HeroSection stats={stats} />
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        {/* Scan Panel */}
+
+        <ScanPanel
+          onScanComplete={() => {
+            fetchDashboard();
+            fetchFiles();
+          }}
+        />
+
+        {/* Statistics */}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
           <StatCard
             title="Total Files"
             value={stats.totalFiles}
+            icon={FolderOpen}
+            color="bg-indigo-500"
+            subtitle="Indexed Files"
           />
 
           <StatCard
             title="Storage Used"
-            value={`${(stats.totalStorage / 1024).toFixed(2)} KB`}
+            value={`${(stats.totalStorage / (1024 * 1024 * 1024)).toFixed(
+              2,
+            )} GB`}
+            icon={HardDrive}
+            color="bg-emerald-500"
+            subtitle="Disk Usage"
           />
 
           <StatCard
             title="PDF Files"
             value={stats.pdfCount}
+            icon={FileText}
+            color="bg-red-500"
+            subtitle="Documents"
           />
 
           <StatCard
             title="Images"
             value={stats.imageCount}
+            icon={Image}
+            color="bg-pink-500"
+            subtitle="Photos"
           />
+        </div>
+
+        <div className="grid grid-cols-2 gap-6 mt-8">
+          <HealthScore stats={stats} />
+
+          <InsightsCard stats={stats} />
         </div>
 
         {/* Search */}
-        <div className="mt-10">
+
+        <div className="bg-white rounded-2xl shadow-md p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-4">Search Files</h2>
+
           <SearchBar
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => searchFiles(e.target.value)}
           />
         </div>
 
-        {/* File Table */}
-        <div className="mt-8">
+        {/* Files */}
+
+        <div className="bg-white rounded-2xl shadow-md p-6">
+          <h2 className="text-xl font-semibold mb-5">Recent Indexed Files</h2>
+
           <FileTable files={files} />
         </div>
-      </main>
+      </div>
     </div>
   );
 }

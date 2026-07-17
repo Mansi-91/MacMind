@@ -2,30 +2,53 @@ const fs = require("fs");
 const path = require("path");
 
 function scanDirectory(directory) {
-    let files = [];
+  let files = [];
 
-    const items = fs.readdirSync(directory);
+  let items = [];
 
-    for (const item of items) {
+  // Read directory safely
+  try {
+    items = fs.readdirSync(directory);
+  } catch (err) {
+    console.log(`Skipping folder: ${directory}`);
+    return files;
+  }
 
-        const fullPath = path.join(directory, item);
-        const stats = fs.statSync(fullPath);
+  for (const item of items) {
+    const fullPath = path.join(directory, item);
 
-        if (stats.isDirectory()) {
-            files = files.concat(scanDirectory(fullPath));
-        } else {
-            files.push({
-                name: item,
-                path: fullPath,
-                size: stats.size,
-                extension: path.extname(item),
-                createdAt: stats.birthtime,
-                modifiedAt: stats.mtime
-            });
-        }
+    let stats;
+
+    // Read file stats safely
+    try {
+      stats = fs.statSync(fullPath);
+    } catch (err) {
+      console.log(`Skipping file: ${fullPath}`);
+      continue;
     }
 
-    return files;
+    // Ignore hidden system folders/files (optional)
+    if (item.startsWith(".")) {
+      continue;
+    }
+
+    if (stats.isDirectory()) {
+      files = files.concat(scanDirectory(fullPath));
+    } else {
+      files.push({
+        name: item,
+        path: fullPath,
+        extension: path.extname(item),
+        size: stats.size,
+        createdAt: stats.birthtime.toISOString(),
+        modifiedAt: stats.mtime.toISOString(),
+      });
+    }
+  }
+
+  return files;
 }
 
-module.exports = scanDirectory;
+module.exports = {
+  scanDirectory,
+};

@@ -1,49 +1,25 @@
 const express = require("express");
 const router = express.Router();
 
-
-const { 
+const {
     dashboardStats,
     fileTypes,
-    storageByType,
+    storageStats,
     largestFiles,
-    recentFiles
+    recentFiles,
+    folderStats
 } = require("../controllers/dashboardController");
 
+router.get("/stats", dashboardStats);
 
+router.get("/file-types", fileTypes);
 
-// Dashboard summary cards
-router.get(
-    "/stats",
-    dashboardStats
-);
+router.get("/storage", storageStats);
 
+router.get("/largest-files", largestFiles);
 
+router.get("/recent-files", recentFiles);
 
-// File distribution analytics
-router.get(
-    "/file-types",
-    fileTypes
-);
-
-
-
-// Storage analytics
-router.get(
-    "/storage",
-    storageByType
-);
-
-router.get(
-    "/largest-files",
-    largestFiles
-);
-
-router.get(
-    "/recent-files",
-    recentFiles
-);
-
-
+router.get("/folder-stats", folderStats);
 
 module.exports = router;

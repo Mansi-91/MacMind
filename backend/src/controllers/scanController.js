@@ -1,25 +1,22 @@
 const scanner = require("../services/scanner");
 const db = require("../database/db");
 
-
 exports.scanFolder = async (req, res) => {
-
     const folderPath = req.query.path;
 
     if (!folderPath) {
         return res.status(400).json({
-            message: "Folder path required"
+            message: "Folder path required",
         });
     }
 
-
     try {
-
+        // Scan folder
         const files = scanner.scanDirectory(folderPath);
 
-
+        // Prevent duplicate entries
         const insert = db.prepare(`
-            INSERT INTO files
+            INSERT OR IGNORE INTO files
             (
                 name,
                 path,
@@ -31,13 +28,10 @@ exports.scanFolder = async (req, res) => {
             VALUES (?,?,?,?,?,?)
         `);
 
-
         let count = 0;
 
-
-        files.forEach(file => {
-
-            insert.run(
+        for (const file of files) {
+            const result = insert.run(
                 file.name,
                 file.path,
                 file.extension,
@@ -46,26 +40,23 @@ exports.scanFolder = async (req, res) => {
                 file.modifiedAt
             );
 
-            count++;
-
-        });
-
+            // Count only newly inserted rows
+            if (result.changes > 0) {
+                count++;
+            }
+        }
 
         res.json({
-
-            message:"Scan completed",
-            filesAdded:count
-
+            message: "Scan completed successfully",
+            filesScanned: files.length,
+            filesAdded: count,
         });
-
-
-    }
-    catch(error){
+    } catch (error) {
+        console.error(error);
 
         res.status(500).json({
-            error:error.message
+            message: "Scanning failed",
+            error: error.message,
         });
-
     }
-
 };

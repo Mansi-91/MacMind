@@ -5,6 +5,7 @@ import Analytics from "./pages/Analytics";
 import Files from "./pages/Files";
 import AISearch from "./pages/AISearch";
 import Settings from "./pages/Settings";
+import Duplicates from "./pages/Duplicates";
 
 function App() {
   return (
@@ -19,6 +20,10 @@ function App() {
         <Route path="/ai-search" element={<AISearch />} />
 
         <Route path="/settings" element={<Settings />} />
+
+        <Route path="/duplicates" element={<Duplicates />} />
+
+        <Route path="/ai-search" element={<AISearch />} />
       </Routes>
     </BrowserRouter>
   );

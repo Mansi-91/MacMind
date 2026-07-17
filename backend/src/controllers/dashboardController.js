@@ -1,129 +1,86 @@
-const { 
+const {
     getStats,
     getFileTypes,
-    getStorageByType, 
+    getStorageByType,
     getLargestFiles,
-    getRecentFiles
+    getRecentFiles,
+    getFolderStats
 } = require("../models/dashboardModel");
 
-
-
-// Dashboard cards data
 const dashboardStats = (req, res) => {
-
     try {
+        res.json(getStats());
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 
-        const stats = getStats();
+const fileTypes = (req, res) => {
+    try {
+        res.json(getFileTypes());
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 
-        res.status(200).json(stats);
+const storageStats = (req, res) => {
+    try {
+        res.json(getStorageByType());
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 
-    } 
-    catch (err) {
+const largestFiles = (req, res) => {
+    try {
+        res.json(getLargestFiles());
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 
+const recentFiles = (req, res) => {
+    try {
+        res.json(getRecentFiles());
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+const folderStats = (req, res) => {
+    try {
+        const files = getFolderStats();
+
+        const folders = {};
+
+        files.forEach(file => {
+            const parts = file.path.split("/");
+
+            // Parent folder name
+            const folder = parts[parts.length - 2] || "Unknown";
+
+            folders[folder] = (folders[folder] || 0) + file.size;
+        });
+
+        const result = Object.entries(folders).map(([folder, size]) => ({
+            folder,
+            size
+        }));
+
+        res.json(result);
+
+    } catch (err) {
         res.status(500).json({
             error: err.message
         });
-
     }
-
 };
-
-
-
-
-// File type distribution analytics
-const fileTypes = (req,res)=>{
-
-    try {
-
-        const data = getFileTypes();
-
-        console.log("FILE TYPES:", data);
-
-        res.status(200).json(data);
-
-    }
-    catch(err){
-
-        console.log("FILE TYPES ERROR:", err);
-
-        res.status(500).json({
-            error:err.message
-        });
-
-    }
-
-};
-
-
-
-
-// Storage analytics
-const storageByType = (req, res) => {
-
-    try {
-
-        const data = getStorageByType();
-
-        res.status(200).json(data);
-
-    } 
-    catch (err) {
-
-        res.status(500).json({
-            error: err.message
-        });
-
-    }
-
-};
-
-const largestFiles = (req,res)=>{
-
-    try{
-
-        const data = getLargestFiles();
-
-        res.status(200).json(data);
-
-    }
-    catch(err){
-
-        res.status(500).json({
-            error:err.message
-        });
-
-    }
-
-};
-
-const recentFiles = (req,res)=>{
-
-    try{
-
-        const data = getRecentFiles();
-
-        res.status(200).json(data);
-
-    }
-    catch(err){
-
-        res.status(500).json({
-            error:err.message
-        });
-
-    }
-
-};
-
-
 
 module.exports = {
-
     dashboardStats,
     fileTypes,
-    storageByType,
+    storageStats,
     largestFiles,
-    recentFiles
-
+    recentFiles,
+    folderStats
 };

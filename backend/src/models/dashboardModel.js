@@ -114,6 +114,15 @@ function getRecentFiles(){
 
 }
 
+function getFolderStats() {
+    return db.prepare(`
+        SELECT
+            path,
+            size
+        FROM files
+    `).all();
+}
+
 
 
 module.exports = {
@@ -122,6 +131,7 @@ module.exports = {
     getFileTypes,
     getStorageByType,
     getLargestFiles,
-    getRecentFiles
+    getRecentFiles,
+    getFolderStats
 
 };

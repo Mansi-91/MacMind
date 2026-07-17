@@ -122,6 +122,23 @@ function advancedSearch(filters) {
   return db.prepare(query).all(...params);
 }
 
+function getDuplicateFiles() {
+  return db
+    .prepare(
+      `
+        SELECT
+            name,
+            size,
+            COUNT(*) AS copies
+        FROM files
+        GROUP BY name, size
+        HAVING COUNT(*) > 1
+        ORDER BY copies DESC, size DESC
+    `,
+    )
+    .all();
+}
+
 module.exports = {
   insertMany,
 
@@ -130,4 +147,6 @@ module.exports = {
   searchFiles,
 
   advancedSearch,
+
+  getDuplicateFiles
 };
