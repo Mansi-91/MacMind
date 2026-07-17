@@ -39,7 +39,7 @@ function Dashboard() {
 
   async function fetchFiles() {
     try {
-      const res = await api.get("/files");
+      const res = await api.get("/dashboard/recent-files");
       setFiles(res.data);
     } catch (err) {
       console.error("Files Error:", err);

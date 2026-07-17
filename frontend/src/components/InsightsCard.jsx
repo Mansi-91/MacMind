@@ -19,7 +19,7 @@ function InsightsCard({ stats }) {
     insights.push("✅ Storage usage is currently low.");
 
   return (
-    <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-6 shadow-lg">
+    <div className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl border border-zinc-800 p-6 shadow-lg">
       <div className="flex items-center gap-3 mb-5">
         <Lightbulb className="text-yellow-400" />
         <h2 className="text-xl font-bold text-white">Storage Insights</h2>

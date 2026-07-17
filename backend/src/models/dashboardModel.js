@@ -3,47 +3,38 @@ const db = require("../database/db");
 
 function getStats() {
 
-    const totalFiles = db.prepare(`
-        SELECT COUNT(*) AS totalFiles
+    return db.prepare(`
+        SELECT
+            COUNT(*) AS totalFiles,
+            COALESCE(SUM(size),0) AS totalStorage,
+
+            SUM(
+                CASE
+                    WHEN extension='.pdf'
+                    THEN 1
+                    ELSE 0
+                END
+            ) AS pdfCount,
+
+            SUM(
+                CASE
+                    WHEN extension IN
+                    (
+                        '.png',
+                        '.jpg',
+                        '.jpeg',
+                        '.gif',
+                        '.webp'
+                    )
+                    THEN 1
+                    ELSE 0
+                END
+            ) AS imageCount
+
         FROM files
     `).get();
-
-
-    const totalStorage = db.prepare(`
-        SELECT SUM(size) AS totalStorage
-        FROM files
-    `).get();
-
-
-    const pdfCount = db.prepare(`
-        SELECT COUNT(*) AS pdfCount
-        FROM files
-        WHERE extension = '.pdf'
-    `).get();
-
-
-    const imageCount = db.prepare(`
-        SELECT COUNT(*) AS imageCount
-        FROM files
-        WHERE extension IN (
-            '.png',
-            '.jpg',
-            '.jpeg',
-            '.gif',
-            '.webp'
-        )
-    `).get();
-
-
-    return {
-        totalFiles: totalFiles.totalFiles,
-        totalStorage: totalStorage.totalStorage || 0,
-        pdfCount: pdfCount.pdfCount,
-        imageCount: imageCount.imageCount
-    };
 
 }
-
 
 
 function getFileTypes(){
@@ -55,6 +46,7 @@ function getFileTypes(){
         FROM files
         GROUP BY extension
         ORDER BY count DESC
+        LIMIT 10
     `).all();
 
 }
@@ -70,6 +62,7 @@ function getStorageByType(){
         FROM files
         GROUP BY extension
         ORDER BY storage DESC
+        LIMIT 10
     `).all();
 
 }

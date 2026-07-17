@@ -45,7 +45,6 @@ function Sidebar() {
 
   return (
     <div className="w-72 min-h-screen bg-slate-900 text-white flex flex-col shadow-xl">
-
       {/* Logo */}
 
       <div className="p-8 border-b border-slate-800">
@@ -54,9 +53,7 @@ function Sidebar() {
 
           <div>
             <h1 className="text-2xl font-bold">MacMind</h1>
-            <p className="text-slate-400 text-sm">
-              Desktop Intelligence
-            </p>
+            <p className="text-slate-400 text-sm">Desktop Intelligence</p>
           </div>
         </div>
       </div>
@@ -64,7 +61,6 @@ function Sidebar() {
       {/* Navigation */}
 
       <nav className="flex-1 px-4 py-6">
-
         {menuItems.map((item) => {
           const Icon = item.icon;
 
@@ -86,27 +82,17 @@ function Sidebar() {
             </NavLink>
           );
         })}
-
       </nav>
 
       {/* Footer */}
 
       <div className="p-6 border-t border-slate-800">
         <div className="bg-slate-800 rounded-xl p-4">
-          <p className="text-sm text-slate-400">
-            Version
-          </p>
+          <p className="text-sm text-slate-400">Version</p>
 
-          <h3 className="font-semibold mt-1">
-            MacMind v1.0
-          </h3>
-
-          <p className="text-xs text-slate-500 mt-2">
-            AI-powered Desktop Analytics
-          </p>
+          <h3 className="font-semibold mt-1">MacMind v1.0</h3>
         </div>
       </div>
-
     </div>
   );
 }

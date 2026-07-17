@@ -1,54 +1,66 @@
 const fs = require("fs");
 const path = require("path");
 
+// Folders to skip
+const SKIP_FOLDERS = new Set([
+    "node_modules",
+    ".git",
+    ".next",
+    ".cache",
+    ".Trash",
+    "Library",
+    "Applications",
+    "System",
+    "Volumes",
+    ".DS_Store"
+]);
+
 function scanDirectory(directory) {
-  let files = [];
+    let files = [];
 
-  let items = [];
+    let items;
 
-  // Read directory safely
-  try {
-    items = fs.readdirSync(directory);
-  } catch (err) {
-    console.log(`Skipping folder: ${directory}`);
-    return files;
-  }
-
-  for (const item of items) {
-    const fullPath = path.join(directory, item);
-
-    let stats;
-
-    // Read file stats safely
     try {
-      stats = fs.statSync(fullPath);
+        items = fs.readdirSync(directory);
     } catch (err) {
-      console.log(`Skipping file: ${fullPath}`);
-      continue;
+        return files;
     }
 
-    // Ignore hidden system folders/files (optional)
-    if (item.startsWith(".")) {
-      continue;
+    for (const item of items) {
+
+        if (SKIP_FOLDERS.has(item)) {
+            continue;
+        }
+
+        const fullPath = path.join(directory, item);
+
+        let stats;
+
+        try {
+            stats = fs.statSync(fullPath);
+        } catch {
+            continue;
+        }
+
+        if (stats.isDirectory()) {
+            files.push(...scanDirectory(fullPath));
+        } else {
+
+            files.push({
+                name: item,
+                path: fullPath,
+                extension: path.extname(item) || "Unknown",
+                size: stats.size,
+                createdAt: stats.birthtime.toISOString(),
+                modifiedAt: stats.mtime.toISOString(),
+            });
+
+        }
     }
 
-    if (stats.isDirectory()) {
-      files = files.concat(scanDirectory(fullPath));
-    } else {
-      files.push({
-        name: item,
-        path: fullPath,
-        extension: path.extname(item),
-        size: stats.size,
-        createdAt: stats.birthtime.toISOString(),
-        modifiedAt: stats.mtime.toISOString(),
-      });
-    }
-  }
-
-  return files;
+    return files;
 }
 
 module.exports = {
-  scanDirectory,
+    scanDirectory,
 };
